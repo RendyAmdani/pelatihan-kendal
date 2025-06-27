@@ -30,7 +30,7 @@
         <tr>
             <td colspan="2"><b>Total</b></td>
             <td class="text-center"><b>{!! array_sum($total) !!}</b></td>
-            {{-- <td>&nbsp;</td> --}}
+            <td>&nbsp;</td>
         </tr>
     </tfoot>
     </table>

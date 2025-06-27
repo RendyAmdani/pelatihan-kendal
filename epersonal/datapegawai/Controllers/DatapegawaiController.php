@@ -66,7 +66,7 @@ class DatapegawaiController extends GembootController {
 	{
 		$nip = \Input::get('nip');
 		$pegawai = \DB::table('tb_01')->where('nip', $nip)->first();
-		return View::make('datapegawai::detailpegawai', compact('pegawai'));
+		return View::make('datapegawai::detailpegawai', compact('pegawai','nip'));
 	}
 
     public function postDetailpegawai()

@@ -58,15 +58,32 @@ class StatistikController extends GembootController {
                 ->leftJoin('tb_01', 'a_tkpendid.idtkpendid', '=', 'tb_01.idtkpendid')
                 ->whereRaw($where)
                 ->whereNotIn('tb_01.idjenkedudupeg', [99, 21])
-                ->groupBy('a_tkpendid.idtkpendid', 'a_tkpendid.tkpendid')
+                ->orderBy('a_tkpendid.idtkpendid')
+                ->groupBy('a_tkpendid.idtkpendid')
                 ->get();
                 return View::make('statistik::statistik_pendidikan', compact('statistik', 'idskpd'));
             break;
             case 2: //agama
-                return View::make('statistik::statistik_agama');
+                $statistik = \DB::table('a_agama')
+                ->select('a_agama.idagama', 'a_agama.agama', \DB::raw('COUNT(*) as jumlah'))
+                ->leftJoin('tb_01', 'a_agama.idagama', '=', 'tb_01.idagama')
+                ->whereRaw($where)
+                ->whereNotIn('tb_01.idjenkedudupeg', [99, 21])
+                ->orderBy('a_golruang.idagama')
+                ->groupBy('a_agama.idagama')
+                ->get();
+                return View::make('statistik::statistik_agama', compact('statistik', 'idskpd'));
             break;
             case 3: //golongan
-                return View::make('statistik::statistik_golongan');
+                $statistik = \DB::table('a_golruang')
+                ->select('a_golruang.idgolru', 'a_golruang.golru', \DB::raw('COUNT(*) as jumlah'))
+                ->leftJoin('tb_01', 'a_golruang.idgolru', '=', 'tb_01.idgolrupkt')
+                ->whereRaw($where)
+                ->whereNotIn('tb_01.idjenkedudupeg', [99, 21])
+                ->orderBy('a_golruang.idgolru')
+                ->groupBy('a_golruang.idgolru')
+                ->get();
+                return View::make('statistik::statistik_golongan', compact('statistik', 'idskpd'));
             break;
         }
 	}
@@ -89,14 +106,29 @@ class StatistikController extends GembootController {
                 ->whereRaw($where)
                 ->where('idtkpendid', $idtkpendid)
                 ->whereNotIn('idjenkedudupeg', [99, 21])
+                ->orderBy('nip')
                 ->get();
                 return View::make('statistik::detail_pendidikan', compact('detail'));
             break;
             case 2: //agama
-                return View::make('statistik::detail_agama');
+                $idagama = Input::get('idagama');
+                $detail = \DB::table('tb_01')
+                ->whereRaw($where)
+                ->where('idagama', $idagama)
+                ->whereNotIn('idjenkedudupeg', [99, 21])
+                ->orderBy('nip')
+                ->get();
+                return View::make('statistik::detail_agama', compact('detail'));
             break;
             case 3: //golongan
-                return View::make('statistik::detail_golongan');
+                $idgolru = Input::get('idgolru');
+                $detail = \DB::table('tb_01')
+                ->whereRaw($where)
+                ->where('idgolrupkt', $idgolru)
+                ->whereNotIn('idjenkedudupeg', [99, 21])
+                ->orderBy('nip')
+                ->get();
+                return View::make('statistik::detail_golongan', compact('detail'));
             break;
         }
 	}

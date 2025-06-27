@@ -27,7 +27,7 @@
         </div>
     </div>
     <div class="col-md-1">
-        <button class="btn btn-primary awal print" type="button"><i class="fa fa-print"></i> Cetak &nbsp;&nbsp;&nbsp;</button>
+        <a href="{!!url('')!!}/epersonal/biodatapegawai/print/{!!$nip!!}" class="btn btn-primary awal print" title="Print Biodata" target="_blank"><i class="fa fa-print"></i> Cetak &nbsp;&nbsp;&nbsp;</a>
     </div>
 </div>
 
