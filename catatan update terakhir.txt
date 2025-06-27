@@ -1,0 +1,5 @@
+Restore / import view v_tb_01.sql pada database db_master_develop digunakan untuk : 
+- ambil data pegawai lengkap + referensi untuk menu print dan detail pegawai stasitik
+- script detail pegawai pada menu statistik dan print pada biodata sudah diupdate
+- gasken diaplikasikan
+- semangat.. 
