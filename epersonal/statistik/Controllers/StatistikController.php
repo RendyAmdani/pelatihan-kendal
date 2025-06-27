@@ -69,7 +69,7 @@ class StatistikController extends GembootController {
                 ->leftJoin('tb_01', 'a_agama.idagama', '=', 'tb_01.idagama')
                 ->whereRaw($where)
                 ->whereNotIn('tb_01.idjenkedudupeg', [99, 21])
-                ->orderBy('a_golruang.idagama')
+                ->orderBy('a_agama.idagama')
                 ->groupBy('a_agama.idagama')
                 ->get();
                 return View::make('statistik::statistik_agama', compact('statistik', 'idskpd'));
@@ -94,15 +94,15 @@ class StatistikController extends GembootController {
         $idskpd = Input::get('idskpd');
         $kategori = Input::get('kategori');
         if($idskpd != ''){
-            $where = "tb_01.kdunit = \"".$idskpd."\"";
+            $where = "kdunit = \"".$idskpd."\"";
         }else{
-            $where = "tb_01.nip != ''";
+            $where = "nip != ''";
         }
 
         switch($kategori){
             case 1: //pendidikan
                 $idtkpendid = Input::get('idtkpendid');
-                $detail = \DB::table('tb_01')
+                $detail = \DB::table('v_tb_01')
                 ->whereRaw($where)
                 ->where('idtkpendid', $idtkpendid)
                 ->whereNotIn('idjenkedudupeg', [99, 21])
@@ -112,7 +112,7 @@ class StatistikController extends GembootController {
             break;
             case 2: //agama
                 $idagama = Input::get('idagama');
-                $detail = \DB::table('tb_01')
+                $detail = \DB::table('v_tb_01')
                 ->whereRaw($where)
                 ->where('idagama', $idagama)
                 ->whereNotIn('idjenkedudupeg', [99, 21])
@@ -122,7 +122,7 @@ class StatistikController extends GembootController {
             break;
             case 3: //golongan
                 $idgolru = Input::get('idgolru');
-                $detail = \DB::table('tb_01')
+                $detail = \DB::table('v_tb_01')
                 ->whereRaw($where)
                 ->where('idgolrupkt', $idgolru)
                 ->whereNotIn('idjenkedudupeg', [99, 21])

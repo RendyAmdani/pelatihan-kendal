@@ -63,7 +63,7 @@
                     table: 'datatable',
                     startColumn: 1,
                     endColumn: 2,
-                    endRow: 13
+                    endRow: $('#datatable tbody tr').length
                 },
                 chart: {
                     type: 'column'
