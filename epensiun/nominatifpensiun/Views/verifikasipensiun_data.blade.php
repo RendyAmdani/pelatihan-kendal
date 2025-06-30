@@ -216,25 +216,6 @@
                             </td>
                         </tr>
 
-                        <tr>
-                            <td>&nbsp;</td>
-                            <td colspan="4">
-                                <table class="table table-striped">
-                                    <thead>
-                                        <tr class="bg-primary">
-                                            <th width="5%">No</th>
-                                            <th width="35%">Dokumen Persyaratan</th>
-                                            <th width="10%">Jumlah</th>
-                                            <th width="10%">Preview</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tb_dokumenpersyaratan">
-                                    </tbody>
-                                </table>
-                                <a id="download_zip"></a>
-                            </td>
-                        </tr>
-
                     </div>
 
                 </div>
@@ -990,60 +971,7 @@
 
 
 <script type="text/javascript">
-    function clickModal(jenis,subjenis,syarat,nip){
-            claravel_modal('Preview Berkas Layanan','Loading...','main_modal');
-            $.ajax({
-                type:'post',
-                url : "{!!url('')!!}/epensiun/nominatifpensiun/data/prefile",
-                data: {'nip': nip, 'jenis': jenis, 'subjenis': subjenis, 'syarat': syarat, '_token' : '{!!csrf_token()!!}'},
-                success:function(html){
-                    $('#main_modal .modal-body').html(html);
-                }
-            });
-        }
 
-        function getDokumenPersyaratan(response,nip,nama,folderName){
-            var html = "";
-            var x = 1;
-            if(response.length > 0){
-                response.forEach(item => {
-                    if (typeof item.jmlfile !== 'undefined') {
-                    html += `
-                    <tr>
-                        <td width="5%" class="text-center">${x++}</td>
-                        <td width="35%">${item.syarat}</td>
-                        <td width="10%" class="text-center">${item.jmlfile}</td>
-                        <td width="10%" class="text-center"><a href="javascript:void(0)" class="prefile btn btn-success" onclick="clickModal('${item.jenis}','${item.subjenis}','${item.syarat}','${nip}')"><i class="fa fa-search"></i> Preview</a></td>
-                    </tr>
-                    `;
-                    }else{
-                        html += `
-                        <tr>
-                            <td width="5%" class="text-center">${x++}</td>
-                            <td width="35%" colspan="2">${item.syarat}</td>
-                            <td width="10%" class="text-center"><a href="javascript:void(0)" class="btn btn-default" onclick="bootbox.alert('Data belum tersedia.');"><i class="fa fa-search"></i> Preview</a></td>
-                        </tr>
-                        `;
-                    }
-                })
-            }else{
-                html = `<tr>
-                <td colspan="4">Data tidak ditemukan.</td>
-                </tr>`
-            }
-
-            $("#tb_dokumenpersyaratan").html(html);
-            var hostname = "https://simpeg.kendalkab.go.id/efile/"
-            // var hostname = "http://localhost:8001/"
-
-            var rtr = response.filter(item => item.jmlfile < 1 ? false : true)
-console.log(rtr);
-            $("#download_zip").attr("href",`${hostname}jadikanzip?nip=${nip}&pegawai=${nama}&nama_folder=${folderName}&data=${JSON.stringify(rtr)}`)
-            .attr("target","_blank")
-            .attr("class","btn btn-primary float-right")
-            .html("Download Zip")
-
-        }
     $(document).ready(function(){
 
         $('.tmt, .date').mask("99-99-9999");
@@ -1060,10 +988,7 @@ console.log(rtr);
 
             success:function(response){
 
-                var reb = $.parseJSON(response);
-                var ret = reb.data1;
-
-                getDokumenPersyaratan(reb.data2,ret.nip,ret.nama,reb.folder);
+                var ret = $.parseJSON(response);
 
                 $('.data-penetap #noskpens').val(ret.noskpensiun);
                 <?php if(session('role_id') < 3){?>
@@ -1140,7 +1065,7 @@ console.log(rtr);
 
                 $('.data-biodata #attr-jskpd').html(ret.jabatan+' '+ret.skpd);
 
-                $('.data-biodata #attr-mkerja').html(ret.mkskr.substr(0,2)+' tahun '+ret.mkskr.substr(-2)+' bulan');
+                // $('.data-biodata #attr-mkerja').html(ret.mkskr.substr(0,2)+' tahun '+ret.mkskr.substr(-2)+' bulan');
 
                 $('.data-biodata #attr-pendidikan').html(ret.jenjurusan);
 
@@ -1149,22 +1074,6 @@ console.log(rtr);
                 $('.data-biodata #attr-nonpwp').html(ret.nonpwp);
                 $('.data-biodata #attr-noktp').html(ret.noktp);
 
-                if(ret.idgolrucpn <= 14 && ret.idgolrupkt >= 41) {//gol 1 ke 4
-                        let golpens = parseInt(ret.mkthnpkt) + 11 + selisihpangkat;
-                        $('.data-attribut #mkthnpens').val(golpens);
-                }else if (ret.idgolrucpn <= 14 && ret.idgolrucpn >= 21 && ret.idgolrupkt <= 34) {//gol 1 ke 3
-                        let golpens = parseInt(ret.mkthnpkt) + 11 + selisihpangkat;
-                        $('.data-attribut #mkthnpens').val(golpens);
-                }else if (ret.idgolrucpn <= 14 && ret.idgolrucpn >= 21 && ret.idgolrupkt <= 24) {//gol 1 ke 2
-                        let golpens = parseInt(ret.mkthnpkt) + 6 + selisihpangkat;
-                        $('.data-attribut #mkthnpens').val(golpens);
-                }else if (ret.idgolrucpn >= 21 && ret.idgolrucpn <= 24 &&  ret.idgolrupkt >= 41){//gol 2 ke 4
-                        let golpens = parseInt(ret.mkthnpkt) + 5 + selisihpangkat;
-                        $('.data-attribut #mkthnpens').val(golpens);
-                }else {
-                        let golpens = parseInt(ret.mkthnpkt) + selisihpangkat;
-                        $('.data-attribut #mkthnpens').val(golpens);
-                }
             //     $('.data-attribut #mkthnpens').val(ret.mkthnpens);
                 $('.data-attribut #mkblnpens').val(ret.mkblnpkt);
                 $('.data-attribut #mkthnpnspens').val(ret.mkthnpnspens);
@@ -1192,9 +1101,6 @@ console.log(rtr);
                 $('.data-penetap #pejpenpens').val(ret.pejpenpens);
                 $('.data-penetap #pangkatpenpens').val(ret.pangkatpenpens);
                 $('.data-penetap #golrupenpens').val(ret.golrupenpens);
-
-                loadRanak(ret.nip);
-                loadRissu(ret.nip);
 
             }
 
@@ -1356,42 +1262,6 @@ console.log(rtr);
         });
 
     });
-
-    function loadRanak(nip){
-        if(nip != ''){
-            $.ajax({
-                type:'post',
-                url: "{!!url('')!!}/epensiun/nominatifpensiun/data/ranak",
-                data:{ 'nip': nip, '_token' : '{!!csrf_token()!!}'},
-                beforeSend:function(){
-                    $('.ranak').html('Looading..');
-                },
-                success:function(response){
-                    $('.ranak').html(response);
-                }
-            });
-        }else{
-            $('.ranak').html(response);
-        }
-    }
-
-    function loadRissu(nip){
-        if(nip != ''){
-            $.ajax({
-                type:'post',
-                url: "{!!url('')!!}/epensiun/nominatifpensiun/data/rissu",
-                data:{ 'nip': nip, '_token' : '{!!csrf_token()!!}'},
-                beforeSend:function(){
-                    $('.rissu').html('Looading..');
-                },
-                success:function(response){
-                    $('.rissu').html(response);
-                }
-            });
-        }else{
-            $('.rissu').html(response);
-        }
-    }
 
       function date_diff_inyear(date1, date2) {
             dt1 = new Date(date1);

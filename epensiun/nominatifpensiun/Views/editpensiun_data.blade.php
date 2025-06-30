@@ -270,8 +270,7 @@
             data: { 'nip':"{!!Input::get('nip')!!}", '_token' : '{!!csrf_token()!!}'},
             type:'post',
             success:function(response){
-                var reb = $.parseJSON(response);
-                var ret = reb.data1;
+                var ret = $.parseJSON(response);
 
                 $('.data-biodata #attr-nip').html(ret.nip);
                 $('.data-biodata #idskpd').html(ret.idskpd);
@@ -280,7 +279,7 @@
                 $('.data-biodata #attr-goltmt').html(ret.golpns_txt+' , '+ret.tmtgollama_);
                 $('.data-biodata #attr-esltmt').html(ret.esl+' , '+ret.tmteselon_);
                 $('.data-biodata #attr-jskpd').html(ret.jabatan+' '+ret.skpd);
-                $('.data-biodata #attr-mkerja').html(String(ret.mkskr).substr(0,2)+' tahun '+String(ret.mkskr).substr(-2)+' bulan');
+                // $('.data-biodata #attr-mkerja').html(String(ret.mkskr).substr(0,2)+' tahun '+String(ret.mkskr).substr(-2)+' bulan');
                 $('.data-biodata #attr-pendidikan').html(ret.jenjurusan);
                 $('.data-biodata #attr-usia').html(String(ret.usia).substr(0,2)+" tahun "+String(ret.usia).substr(2, 2)+" bulan");
                 $('.data-biodata #attr-hp').html(ret.hp);

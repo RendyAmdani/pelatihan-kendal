@@ -102,4 +102,59 @@ class NominatifpensiunModel extends GembootModel {
         return $rs;
     }
 
+    /*function untuk mendapatkan data kgb yang sudah verifikasi perorangan*/
+    public static function getNominatifver($nip){
+        $rs = \DB::table("tr_pensiun as a")
+            ->select('a.*','a_agama.agama as agama',
+                \DB::raw("b.pangkat as golpnsskr_txt, b.golru as golpns_txt, d.jabatan as pejpenkgbl_txt,f.*,e.skpd,e.path_short,a_tkpendid.tkpendid,a_jenjurusan.jenjurusan"),
+                \DB::raw("CONCAT(f.gdp,IF(LENGTH(f.gdp)>0,' ',''),f.nama,IF(LENGTH(f.gdb)>0,', ',''),f.gdb) AS namalengkap"),
+                \DB::raw("DATE_FORMAT(a.tmtpens,'%d-%m-%Y') AS tmtpens_, a.tmtpens"),
+                \DB::raw("DATE_FORMAT(f.tglhr,'%d-%m-%Y') AS tgllahir_"),
+                \DB::raw("DATE_FORMAT(f.tmtpkt,'%d-%m-%Y') AS tmtgollama_"),
+                \DB::raw("DATE_FORMAT(f.tmtesljbt,'%d-%m-%Y') AS tmteselon_"),
+                \DB::raw('IF(f.idjenjab>4,e.jab,IF(f.idjenjab=2,a_jabfung.jabfung,IF(f.idjenjab=3,a_jabfungum.jabfungum,"-"))) as jabatan'),
+                \DB::raw("DATE_FORMAT(f.tmtjbt,'%d-%m-%Y') AS tmtjbt_"),
+                \DB::raw("IF(f.idjenjab=2,a_jabfung.jabfung,IF(f.idesljbt BETWEEN '11' AND '51',e.jab,IF(f.idjenjab=3,a_jabfungum.jabfungum,''))) AS namajab"),
+                \DB::raw('IF(f.idjenjab>4,e.jab,IF(f.idjenjab=2,a_jabfung.jabfung,IF(f.idjenjab=3,a_jabfungum.jabfungum,"-"))) as jabatan')
+            )
+            ->join('tb_01 as f', 'a.nip', '=', 'f.nip')
+            ->join('a_skpd as e', 'f.idskpd', '=', 'e.idskpd')
+            ->leftJoin('a_golruang as b', 'f.idgolrupkt', '=', 'b.idgolru')
+            ->leftJoin('a_penetapsk as d', 'f.pejmenpkt', '=', 'd.id')
+            ->leftjoin('a_jabfung', 'f.idjabfung', '=', 'a_jabfung.idjabfung')
+            ->leftjoin('a_jabfungum', 'f.idjabfungum', '=', 'a_jabfungum.idjabfungum')
+            ->leftjoin('a_tkpendid', 'f.idtkpendid', '=', 'a_tkpendid.idtkpendid')
+            ->leftjoin('a_jenjurusan', 'f.idjenjurusan', '=', 'a_jenjurusan.idjenjurusan')
+            ->leftjoin('a_agama','f.idagama','=','a_agama.idagama')
+            ->where('a.nip', $nip)
+            ->first();
+
+        return $rs;
+    }
+
+    public static function getTemplatesk($idskpd,$jenis='',$idgol=''){
+        $role = \Session::get('role_id');
+        if($jenis == 1){
+            $rs = \DB::table('tr_dpcp_template')
+                ->where('idskpd', 'all')
+                ->where('jenis', $jenis)
+                ->first();
+        }else if($jenis == 2){
+            $rs = \DB::table('tr_dpcp_template')
+                ->where('idskpd', 'all')
+                ->where('jenis', $jenis)
+                ->first();
+        }else{
+            $rs = \DB::table('tr_dpcp_template')
+                ->where('idskpd', substr($idskpd,0,2))
+                ->first();
+        }
+
+        if($rs){
+            return $rs->template;
+        }else{
+            return "0";
+        }
+    }
+
 }

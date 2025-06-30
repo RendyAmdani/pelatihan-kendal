@@ -299,4 +299,211 @@ class NominatifpensiunController extends GembootController {
         $data['nip']  = Input::get('nip');
         return View::make('nominatifpensiun::'.$view.'_data', $data);
     }
+
+    /*function preview edit pensiun*/
+    function postEditpensiun(){
+        $nip = Input::get('nip');
+
+        $rs = \DB::table("tr_pensiun as a")
+            ->select('a.*',
+                \DB::raw("b.pangkat as golpnsskr_txt, b.golru as golpns_txt, d.jabatan as pejpenkgbl_txt,f.*,e.skpd,e.path_short,a_tkpendid.tkpendid,a_jenjurusan.jenjurusan,a.idjenkedudupeg as idjenkedudupeg_,a.idjenpens as idjenpens_,a.noskpens as noskpensiun"),
+                \DB::raw("CONCAT(f.gdp,IF(LENGTH(f.gdp)>0,' ',''),f.nama,IF(LENGTH(f.gdb)>0,', ',''),f.gdb) AS namalengkap"),
+                \DB::raw("DATE_FORMAT(a.tmtpens,'%d-%m-%Y') AS tmtpens_"),
+                \DB::raw("DATE_FORMAT(f.tglhr,'%d-%m-%Y') AS tgllahir_"),
+                \DB::raw("DATE_FORMAT(f.tmtpkt,'%d-%m-%Y') AS tmtgollama_"),
+                \DB::raw("DATE_FORMAT(f.tmtjbt,'%d-%m-%Y') AS tmtjbt_"),
+                // \DB::raw("DATE_FORMAT(a.tmtpens,'%d-%m-%Y') AS tmtpens_"),
+                \DB::raw("DATE_FORMAT(f.tmtcpn,'%d-%m-%Y') AS tmtcpn_"),
+                \DB::raw("DATE_FORMAT(a.tgskpens,'%d-%m-%Y') AS tgskpens_"),
+                \DB::raw("IF(f.idjenjab=2,a_jabfung.jabfung,IF(f.idesljbt BETWEEN '11' AND '51',e.jab,IF(f.idjenjab=3,a_jabfungum.jabfungum,''))) AS namajab"),
+                \DB::raw('IF(f.idjenjab>4,e.jab,IF(f.idjenjab=2,a_jabfung.jabfung,IF(f.idjenjab=3,a_jabfungum.jabfungum,"-"))) as jabatan'),
+                \DB::raw("DATE_FORMAT(FROM_DAYS(TO_DAYS(NOW())-TO_DAYS(f.tglhr)), '%Y%m')+0 AS usia")
+            )
+            ->join('tb_01 as f', 'a.nip', '=', 'f.nip')
+            ->join('a_skpd as e', 'f.idskpd', '=', 'e.idskpd')
+            ->leftJoin('a_golruang as b', 'f.idgolrupkt', '=', 'b.idgolru')
+            ->leftJoin('a_penetapsk as d', 'f.pejmenpkt', '=', 'd.id')
+            ->leftjoin('a_jabfung', 'f.idjabfung', '=', 'a_jabfung.idjabfung')
+            ->leftjoin('a_jabfungum', 'f.idjabfungum', '=', 'a_jabfungum.idjabfungum')
+            ->leftjoin('a_tkpendid', 'f.idtkpendid', '=', 'a_tkpendid.idtkpendid')
+            ->leftjoin('a_jenjurusan', 'f.idjenjurusan', '=', 'a_jenjurusan.idjenjurusan')
+            ->where('a.nip', $nip)
+            ->first();
+
+        echo json_encode($rs);
+    }
+
+    /*function untuk simpan update pensiun*/
+    function postUpdatepensiun(){
+        cekAjax();
+        $input = Input::all();
+        $dt['nip'] = $input['nip'];
+
+        $data['tmtpens'] = date("Y-m-d", strtotime($input['tmtpens']));
+        $data['idjenkedudupeg'] = $input['idjenkedudupeg'];
+        $data['idjenpens'] = $input['idjenpens'];
+        $data['keterangan'] = $input['keterangan'];
+        $data['almskrpens'] = $input['alm'];
+        $data['almrtskrpens'] = $input['almrt'];
+        $data['almrwskrpens'] = $input['almrw'];
+        $data['almdesaskrpens'] = $input['almdesa'];
+        $data['almkecskrpens'] = $input['almkec'];
+        $data['almkabskrpens'] = $input['almkab'];
+        $data['almprovskrpens'] = $input['almprov'];
+        $data['almpens'] = $input['almpens'];
+        $data['almrtpens'] = $input['almrtpens'];
+        $data['almrwpens'] = $input['almrwpens'];
+        $data['almdesapens'] = $input['almdesapens'];
+        $data['almkecpens'] = $input['almkecpens'];
+        $data['almkabpens'] = $input['almkabpens'];
+        $data['almprovpens'] = $input['almprovpens'];
+
+        if(!\DB::table("tr_pensiun")->where($dt)->update($data)){
+            echo "Edit Pensiun gagal disimpan";
+        }else{
+            echo 4;
+        }
+    }
+
+    /*function untuk verifikasi pensiun*/
+    function postVerifikasipensiun(){
+        cekAjax();
+        $input = Input::all();
+
+        $dt['nip'] = $input['nip'];
+
+        $noskpens = $input['noskpens'];
+
+        if(Input::get('statususul') == 1){
+            $data = array(
+                // 'ispengantar' => Input::get('ispengantar'),
+                // 'isnominatif' => Input::get('isnominatif'),
+                // 'isskpkt' => Input::get('isskpkt'),
+                // 'isskkgb' => Input::get('isskkgb'),
+                // 'isdp3' => Input::get('isdp3'),
+                // 'isskhukdis' => Input::get('isskhukdis'),
+                // 'isskpmk' => Input::get('isskpmk'),
+                'mkthnpktpens' => Input::get('mkthnpkt'),
+                'mkblnpktpens' => Input::get('mkblnpkt'),
+                'mkthnpens' => Input::get('mkthnpens'),
+                'mkblnpens' => Input::get('mkblnpens'),
+                'mkthnpnspens' => Input::get('mkthnpnspens'),
+                'mkblnpnspens' => Input::get('mkblnpnspens'),
+                'tglmasukpns' => date("Y-m-d", strtotime(Input::get('tglmasukpns'))),
+                'almskrpens' => Input::get('alm'),
+                'almrtskrpens' => Input::get('almrt'),
+                'almrwskrpens' => Input::get('almrw'),
+                'almdesaskrpens' => Input::get('almdesa'),
+                'almkecskrpens' => Input::get('almkec'),
+                'almkabskrpens' => Input::get('almkab'),
+                'almprovskrpens' => Input::get('almprov'),
+                'almpens' => Input::get('almpens'),
+                'almrtpens' => Input::get('almrtpens'),
+                'almrwpens' => Input::get('almrwpens'),
+                'almdesapens' => Input::get('almdesapens'),
+                'almkecpens' => Input::get('almkecpens'),
+                'almkabpens' => Input::get('almkabpens'),
+                'almprovpens' => Input::get('almprovpens'),
+                'statususul' => Input::get('statususul'),
+                'statussk' => Input::get('statussk'),
+                'iscetaksk' => Input::get('iscetaksk'),
+                'kettms' => '',
+                'ketbtl' => '',
+                'idpejabpens' => Input::get('idpejabpens'),
+                'noskpens' => $noskpens,
+                'tgskpens' => date("Y-m-d", strtotime(Input::get('tgskpens'))),
+                // 'jabpenpens' => Input::get('jabpenpens'),
+                // 'pejpenpens' => Input::get('pejpenpens'),
+                // 'nippenpens' => Input::get('nippenpens'),
+                // 'golrupenpens' => Input::get('golrupenpens'),
+                'updated_at' => sekarang(),
+                'user_id' => session('user_id')
+            );
+
+            /*if(Input::get('iscetaksk') == 1){
+                $this->insertIntorkgb($dt['idkgb'], $dt['nip']);
+            }else if(Input::get('iscetaksk') == 2){
+                $this->batalIntorkgb($dt['idkgb'], $dt['nip']);
+            }*/
+        }else if(Input::get('statususul') == 2){
+            $data = array(
+                // 'ispengantar' => Input::get('ispengantar'),
+                // 'isnominatif' => Input::get('isnominatif'),
+                // 'isskpkt' => Input::get('isskpkt'),
+                // 'isskkgb' => Input::get('isskkgb'),
+                // 'isdp3' => Input::get('isdp3'),
+                // 'isskhukdis' => Input::get('isskhukdis'),
+                // 'isskpmk' => Input::get('isskpmk'),
+                'mkthnpens' => Input::get('mkthnpens'),
+                'mkblnpens' => Input::get('mkblnpens'),
+                'mkthnpnspens' => Input::get('mkthnpnspens'),
+                'mkblnpnspens' => Input::get('mkblnpnspens'),
+                'almpens' => Input::get('almpens'),
+                'tglmasukpns' => date("Y-m-d", strtotime(Input::get('tglmasukpns'))),
+                'almrtpens' => Input::get('almrtpens'),
+                'almrwpens' => Input::get('almrwpens'),
+                'almdesapens' => Input::get('almdesapens'),
+                'almkecpens' => Input::get('almkecpens'),
+                'almkabpens' => Input::get('almkabpens'),
+                'almprovpens' => Input::get('almprovpens'),
+                'statususul' => Input::get('statususul'),
+                'statussk' => '',
+                'kettms' => Input::get('kettms'),
+                'ketbtl' => '',
+                'tgskpens' => '',
+                'updated_at' => sekarang(),
+                /*'userver' => session('user_id')
+                'noskkgbb' => '',                ,
+                'jabpenkgbb' => '',
+                'pejpenkgbb' => '',
+                'nippb' => '',
+                'golrupb' => ''*/
+            );
+        }else {
+            $data = array(
+                // 'ispengantar' => Input::get('ispengantar'),
+                // 'isnominatif' => Input::get('isnominatif'),
+                // 'isskpkt' => Input::get('isskpkt'),
+                // 'isskkgb' => Input::get('isskkgb'),
+                // 'isdp3' => Input::get('isdp3'),
+                // 'isskhukdis' => Input::get('isskhukdis'),
+                // 'isskpmk' => Input::get('isskpmk'),
+                'mkthnpens' => Input::get('mkthnpens'),
+                'mkblnpens' => Input::get('mkblnpens'),
+                'mkthnpnspens' => Input::get('mkthnpnspens'),
+                'mkblnpnspens' => Input::get('mkblnpnspens'),
+                'almpens' => Input::get('almpens'),
+                'tglmasukpns' => date("Y-m-d", strtotime(Input::get('tglmasukpns'))),
+                'almrtpens' => Input::get('almrtpens'),
+                'almrwpens' => Input::get('almrwpens'),
+                'almdesapens' => Input::get('almdesapens'),
+                'almkecpens' => Input::get('almkecpens'),
+                'almkabpens' => Input::get('almkabpens'),
+                'almprovpens' => Input::get('almprovpens'),
+                'statususul' => Input::get('statususul'),
+                'statussk' => '',
+                'kettms' => '',
+                'ketbtl' => Input::get('ketbtl'),
+                'tgskpens' => '',
+                'updated_at' => sekarang(),
+                'user_id' => session('user_id')/*,
+                'noskkgbb' => '',
+                'jabpenkgbb' => '',
+                'pejpenkgbb' => '',
+                'nippb' => '',
+                'golrupb' => ''*/
+            );
+        }
+
+        if(!\DB::table('tr_pensiun')->where($dt)->update($data)){
+            echo "Verifikasi Pensiun gagal disimpan";
+        }else{
+            echo 4;
+        }
+    }
+
+    /*function cetak sperorangan*/
+    function getCetaksk($nip='', $idskpd=''){
+        return View::make('nominatifpensiun::skpens', compact('nip', 'idskpd'));
+    }
 }
