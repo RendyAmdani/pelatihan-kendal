@@ -882,5 +882,290 @@ function comboGolru($id="idgolru", $sel="", $required="", $tampilan = 1)
     return $ret;
 }
 
+function comboKategori($id ='',$selected=""){
+    $h = "<select id='$id' name='$id' class='form-control' style='width:100%'>";
+    $h .= '<option value="">.: Pilihan :. </option>';
+    $h .= '<option '.(($selected == '1')?'selected':'').' value="1">Pendidikan</option>';
+    $h .= '<option '.(($selected == '2')?'selected':'').' value="2">Agama</option>';
+    $h .= '<option '.(($selected == '3')?'selected':'').' value="3">Golongan</option>';
+    $h .= '</select>';
+    return $h;
+}
+
+/*cobo list skpd*/
+function comboSkpd($id="idskpd", $sel="", $required="", $where="", $holder=".: Pilihan :.")
+{
+    $ret = "<select id=\"$id\" name=\"$id\" $required style='width: 100%;' class=\"form-control\">";
+    if (session('role_id') < 4) {
+        $ret.="<option value=\"\">".$holder."</option>";
+    } else {
+        $ret.="<option value=".session('idskpd').">".$holder."</option>";
+    }
+
+    if ($where != '') {
+        $rs = \DB::table('a_skpd')->where('flag', 1)->where('idskpd', 'like', ''.$where. '%')->orderBy('idskpd', 'asc')->get();
+    } else {
+        $rs = \DB::table('a_skpd')->where('flag', 1)->orderBy('idskpd', 'asc')->get();
+    }
+
+    foreach ($rs as $item) {
+        $nbsp = '';
+        $char = strlen($item->idskpd);
+        $index = substr($item->idskpd, 0, 2);
+        for ($x=0; $x<=$char; $x++) {
+            if ($char > 2) {
+                $nbsp.='&nbsp;&nbsp;';
+            }
+        }
+
+        $isSel = (($item->idskpd==$sel)?"selected":"");
+        $ret.=($char==2)?"<optgroup label='".$item->skpd."'>":"";
+        $ret.="<option value=\"".$item->idskpd."\" $isSel >".$nbsp."".$item->skpd."</option>";
+        $ret.=($index != substr($item->idskpd, 0, 2))?"</optgroup>":"";
+    }
+    $ret.="</select>";
+    return $ret;
+}
+
+/*combo list bulan*/
+function comboBulan($id="bulan", $sel="", $required="", $holder=".: Pilihan :.")
+{
+    $month2[1] = "Januari";
+    $month2[2] = "Februari";
+    $month2[3] = "Maret";
+    $month2[4] = "April";
+    $month2[5] = "Mei";
+    $month2[6] = "Juni";
+    $month2[7] = "Juli";
+    $month2[8] = "Agustus";
+    $month2[9] = "September";
+    $month2[10] = "Oktober";
+    $month2[11] = "November";
+    $month2[12] = "Desember";
+    $html = "<select name=\"$id\" id=\"$id\" $required style='width: 100%;' class=\"form-control\">";
+    $now = '';
+    $html .= "<option value=''>".$holder."</option>";
+    for ($i = 1; $i <= 12; $i++) {
+        $bulan = $month2[$i];
+        if (strlen($i) == 1) {
+            $i = "0" . $i;
+        }
+        if ($i == $sel) {
+            $html .= "<option value='$i' selected>$i | $bulan</option>";
+        } else {
+            $html .= "<option value='$i'>$i | $bulan</option>";
+        }
+        $now = 1;
+        $now = $now + $i;
+    }
+    $html .= "</select>";
+    return $html;
+}
+
+/*combo list tahun*/
+function comboTahun($id="tahun", $sel="", $required="", $holder='.: Pilihan :.')
+{
+    $html="<select id=\"$id\" name=\"$id\" $required style='width: 100%;' class=\"form-control\">";
+    $html .= "<option value=''>".$holder."</option>";
+    for ($i=date('Y')-5;$i<=date('Y')+30;$i++) {
+        $html.="<option value='$i' ".(($i==$sel)?"selected":"").">$i</option>";
+    }
+    $html.="</select>";
+    return $html;
+}
+
+/*function combo list status pns*/
+function comboStspns($id="idstspeg", $sel="", $required="")
+{
+    $ret = "<select id=\"$id\" name=\"$id\" class=\"it\" $required style=\"width:100%\">";
+    $ret.="<option value=\"\" ".(($sel=='')?'selected':'').">.: Pilihan :.</option>";
+    $ret.="<option value=\"1\" ".(($sel=='1')?'selected':'').">CPNS</option>";
+    $ret.="<option value=\"2\" ".(($sel=='2')?'selected':'').">PNS</option>";
+    $ret.="<option value=\"3\" ".(($sel=='3')?'selected':'').">PPPK</option>";
+    $ret.="</select>";
+    return $ret;
+}
+
+/*function untuk mendapatkan nama bulan*/
+function formatBulan($bln)
+{
+    $bln = (($bln >0) && ($bln < 10))? substr($bln, 1, 1): $bln ;
+    $aBulan = array(1=> "Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember");
+    $date = $aBulan[$bln];
+    return $date;
+}
+
+/*function untuk mendapatkan nama skpd*/
+function getSkpd($idskpd)
+{
+    $rs = \DB::table('a_skpd')->where('idskpd', $idskpd)->first();
+    if ($rs) {
+        if (strlen($idskpd) == 2) {
+            return $rs->skpd;
+        } else {
+            return $rs->path;
+        }
+    } else {
+        return 'Semua Unit Kerja';
+    }
+}
+
+/*helper sownload*/
+function force_download($filename = '', $data = '')
+{
+    if ($filename == '' or $data == '') {
+        return false;
+    }
+
+    // Try to determine if the filename includes a file extension.
+    // We need it in order to set the MIME type
+    if (false === strpos($filename, '.')) {
+        return false;
+    }
+
+    // Grab the file extension
+    $x = explode('.', $filename);
+    $extension = end($x);
+
+    // Load the mime types
+    if (defined('ENVIRONMENT') and is_file('app/'.ENVIRONMENT.'/mimes.php')) {
+        include('app/'.ENVIRONMENT.'/mimes.php');
+    } elseif (is_file('app/mimes.php')) {
+        include('app/mimes.php');
+    }
+
+    // Set a default mime if we can't find it
+    if (! isset($mimes[$extension])) {
+        $mime = 'application/octet-stream';
+    } else {
+        $mime = (is_array($mimes[$extension])) ? $mimes[$extension][0] : $mimes[$extension];
+    }
+
+    // Generate the server headers
+    if (strpos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== false) {
+        header('Content-Type: "'.$mime.'"');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header("Content-Transfer-Encoding: binary");
+        header('Pragma: public');
+        header("Content-Length: ".strlen($data));
+    } else {
+        header('Content-Type: "'.$mime.'"');
+        header('Content-Disposition: attachment; filename="'.$filename.'"');
+        header("Content-Transfer-Encoding: binary");
+        header('Expires: 0');
+        header('Pragma: no-cache');
+        header("Content-Length: ".strlen($data));
+    }
+
+    exit($data);
+}
+
+function comboStatussk($id="statussk",$sel="",$required="",$holder=".: Pilihan :."){
+    $html ="<select name=\"$id\" id=\"$id\" $required style='width: 100%;' class=\"form-control\">";
+    $html.="<option value=\"\">".$holder."</option>";
+    $html.="<option value=\"0\" ".(($sel=='0')?"selected":"").">Belum Diproses</option>";
+    $html.="<option value=\"2\" ".(($sel=='2')?"selected":"").">Dalam Proses</option>";
+    $html.="<option value=\"1\" ".(($sel=='1')?"selected":"").">Proses Selesai</option>";
+    $html.="</select>";
+    return $html;
+}
+
+function tglina($date, $stat = '')
+{
+    if (($date!='0000-00-00') or ($date!='1970-01-01') or ($date!='')) {
+        if($stat == 'en'){
+            return date("Y-m-d", strtotime($date));
+        }else{
+            return date("d-m-Y", strtotime($date));
+        }
+    } else {
+        return "-";
+    }
+}
+
+function getPenetapsk($id="", $field="")
+{
+    $data = \DB::table('a_penetapsk')->select('a_penetapsk.*')->where('id', '=', $id)->first();
+
+    if ($field != "") {
+        $dt = $data->$field;
+    } else {
+        $dt = "";
+    }
+
+    return $dt;
+}
+
+/*get kepala skpd/ penandatangan sk kgb*/
+function getKepskpd($idskpd='', $field='')
+{
+    $where = "a.idjenkedudupeg not in (99,21)";
+    if ($idskpd!='') {
+        if (strlen($idskpd) == "2") {
+            $skpd = substr($idskpd, 0, 2);
+            // $where .=" and a.idjenjab = 20 and a.idskpd = \"".$idskpd."\" ";
+            $where .=" and a.idjabjbt = \"".$idskpd."\" ";
+        } else {
+            $skpd = substr($idskpd, 0, 2);
+            $where .=" and a.idjabjbt = \"".$idskpd."\" ";
+        }
+    }
+
+    $rs = \DB::table('tb_01 as a')
+    ->select(
+        'a.nip',
+        \DB::raw("CONCAT(a.gdp,IF(LENGTH(a.gdp)>0,' ',''),a.nama,IF(LENGTH(a.gdb)>0,', ',''),a.gdb) AS nama"),
+        'a.idskpd',
+        'a.idjenjab',
+        'a.idjabjbt',
+        'b.skpd',
+        'b.jab',
+        'b.jab_utuh',
+        'c.golru',
+        'c.pangkat'
+    )
+    ->join('a_skpd as b', 'a.idjabjbt', '=', 'b.idskpd')
+    ->leftJoin('a_golruang as c', 'a.idgolrupkt', '=', 'c.idgolru')
+    ->whereRaw($where)
+    ->first();
+
+    if($rs){
+        $rs = \DB::table('a_skpd as b')
+            ->select(
+            'a.nip', \DB::raw("CONCAT(a.gdp,IF(LENGTH(a.gdp)>0,' ',''),a.nama,IF(LENGTH(a.gdb)>0,', ',''),a.gdb) AS nama"),
+            'a.idskpd', 'a.idjenjab', 'a.idjabjbt', 'b.skpd', 'c.golru', 'c.pangkat',
+            \DB::raw('concat("Plt. ", b.jab) as jab'), \DB::raw('concat("Plt. ", b.jab_utuh) as jab_utuh'))
+            ->join('tb_01 as a', 'b.plt_nip', '=', 'a.nip')
+            ->leftJoin('a_golruang as c', 'a.idgolrupkt', '=', 'c.idgolru')
+            ->whereRaw("b.idskpd = \"".$skpd."\"")
+            ->first();
+    }
+
+    if ($rs) {
+        if ($field!='') {
+            return $rs->$field;
+        } else {
+            return '-';
+        }
+    } else {
+        return '-';
+    }
+}
 
 
+/*cobo list jenis pensiun*/
+function comboJenpens($id="idjenpens", $sel="", $required="")
+{
+    $ret = "<select id=\"$id\" name=\"$id\" $required style='width: 100%;' class=\"form-control\">";
+    $ret.="<option value=\"\">.: Pilihan :.</option>";
+
+    $rs = \DB::table('a_jenpens')->orderBy('jenpens', 'asc')->get();
+    foreach ($rs as $item) {
+        $isSel = (($item->idjenpens==$sel)?"selected":"");
+        $ret.="<option value=\"".$item->idjenpens."\" $isSel >".$item->jenpens."</option>";
+    }
+    $ret.="</select>";
+    return $ret;
+}
