@@ -20,7 +20,7 @@ SELECT
     CONCAT(tb_01.gdp, IF(LENGTH(tb_01.gdp) > 0, " ", ""), tb_01.nama, IF(LENGTH(tb_01.gdb) > 0, ", ", ""), tb_01.gdb) AS namalengkap,
     b_skpd.skpd AS unit,    
     #a_jenkel.jenkel,
-	CONCAT(LEFT(((`tb_01`.`tglhr` + INTERVAL IF((`tb_01`.`idjenjab` >= 20),`a_skpd`.`bup`,IF((`tb_01`.`idjenjab` = 2),`a_jabfung`.`pens`,IF((`tb_01`.`idjenjab` = 3),`a_jabfungum`.`pens`,58))) YEAR) + INTERVAL 1 MONTH),8),'01') AS `pensiunnext`,
+	CONCAT(LEFT(((`tb_01`.`tglhr` + INTERVAL IF((`tb_01`.`idjenjab` >= 20),`b_skpd`.`bup`,IF((`tb_01`.`idjenjab` = 2),`a_jabfung`.`pens`,IF((`tb_01`.`idjenjab` = 3),`a_jabfungum`.`pens`,58))) YEAR) + INTERVAL 1 MONTH),8),'01') AS `pensiunnext`,
     IF(tb_01.idjenkel=1,'Pria', IF(tb_01.idjenkel=2,'Wanita', '-')) AS jenkel,
     a_agama.agama,
     IF(tb_01.idjenjab > 4, b_skpd.jab, 
